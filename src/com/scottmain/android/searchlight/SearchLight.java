@@ -18,25 +18,27 @@ package com.scottmain.android.searchlight;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
-import android.app.ActionBar;
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
+import android.app.*;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.TransitionDrawable;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.view.*;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageButton;
 
-public class SearchLight extends Activity implements PreviewSurface.Callback {
+public class SearchLight extends Activity implements PreviewSurface.Callback, SensorEventListener {
     //private final static String TAG = "SearchLight";
     private final static String MODE_TYPE = "mode_type";
     ImageButton bulb;
@@ -50,6 +52,9 @@ public class SearchLight extends Activity implements PreviewSurface.Callback {
     boolean mIsHC = false;
     boolean mIsJB = false;
     int mCurrentMode = R.id.mode_normal;
+
+    private SensorManager sensorManager;
+    private Vibrator vibrator;
 
     /**
      * Called when the activity is first created.
@@ -117,15 +122,20 @@ public class SearchLight extends Activity implements PreviewSurface.Callback {
         bulb = (ImageButton) findViewById(R.id.button);
         mDrawable = (TransitionDrawable) bulb.getDrawable();
         mDrawable.setCrossFadeEnabled(true);
+
+        sensorManager = (SensorManager) getSystemService(Service.SENSOR_SERVICE);
+        vibrator = (Vibrator) getSystemService(Service.VIBRATOR_SERVICE);
     }
 
-    public void toggleLight(View v) {
+    public void toggleLight(View view) {
+        vibrator.vibrate(100);
         if (on) {
             turnOff();
         } else {
             turnOn();
         }
     }
+
 
     private void turnOn() {
         if (!on) {
@@ -154,6 +164,9 @@ public class SearchLight extends Activity implements PreviewSurface.Callback {
     @Override
     protected void onResume() {
         super.onResume();
+        sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+            SensorManager.SENSOR_DELAY_NORMAL);
+
         if (paused) {
             mSurface.initCamera();
         }
@@ -162,6 +175,10 @@ public class SearchLight extends Activity implements PreviewSurface.Callback {
     @Override
     protected void onStop() {
         super.onStop();
+        if (sensorManager != null) {
+            sensorManager.unregisterListener(this);
+        }
+
         paused = false;
 
         // Save the current mode so it's not lost when process stops
@@ -336,6 +353,21 @@ public class SearchLight extends Activity implements PreviewSurface.Callback {
 
 
     boolean mIgnoreTouch = false;
+
+    @Override
+    public void onSensorChanged(SensorEvent sensorEvent) {
+        int sensorType = sensorEvent.sensor.getType();
+        if (sensorType == Sensor.TYPE_ACCELEROMETER) {
+            float[] values = sensorEvent.values;
+            if ((Math.abs(values[0]) > 19 || Math.abs(values[1]) > 19 || Math.abs(values[2]) > 19)) {
+                toggleLight(null);
+            }
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int i) {
+    }
 
     /* Bullshit timout to make UI hiding fluid for versions before JB */
     private class TimeoutSystemUITask extends AsyncTask<Integer, Integer, Integer> {
