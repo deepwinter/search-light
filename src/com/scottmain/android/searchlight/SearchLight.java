@@ -84,25 +84,18 @@ public class SearchLight extends Activity implements PreviewSurface.Callback {
             setIntent(intent);
         }
         
-        switch(mode) {
-        case R.id.mode_black:
-        	setContentView(R.layout.black);
-        	mCurrentMode = R.id.mode_black;
-
-            setSystemUiVisible(false);
-        	break;
-        case R.id.mode_viewfinder:
-        	setContentView(R.layout.viewfinder);
-        	mCurrentMode = R.id.mode_viewfinder;
-
-        	setSystemUiVisible(false);
-        	break;
-        case R.id.mode_normal:
-        default:
-            setContentView(R.layout.main);
-            mCurrentMode = R.id.mode_normal;
-        	break;
-        }
+        if (mode == R.id.mode_black) {
+			setContentView(R.layout.black);
+			mCurrentMode = R.id.mode_black;
+			setSystemUiVisible(false);
+		} else if (mode == R.id.mode_viewfinder) {
+			setContentView(R.layout.viewfinder);
+			mCurrentMode = R.id.mode_viewfinder;
+			setSystemUiVisible(false);
+		} else {
+			setContentView(R.layout.main);
+			mCurrentMode = R.id.mode_normal;
+		}
         
         // Remove icon and title from action bar
         if (mIsHC) {
@@ -194,8 +187,7 @@ public class SearchLight extends Activity implements PreviewSurface.Callback {
 
 	@Override
 	protected Dialog onCreateDialog(int id) {
-		switch (id) {
-		case R.id.dialog_camera_na:
+		if (id == R.id.dialog_camera_na) {
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setMessage(R.string.dialog_camera_na)
 			       .setCancelable(false)
@@ -205,7 +197,7 @@ public class SearchLight extends Activity implements PreviewSurface.Callback {
 			           }
 			       });
 			return builder.create();
-		default:
+		} else {
 			return super.onCreateDialog(id);
 		}
 	}
@@ -228,54 +220,52 @@ public class SearchLight extends Activity implements PreviewSurface.Callback {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
+		
 		Intent intent;
-	    switch (item.getItemId()) {
-	    case R.id.black:
-	        intent = new Intent(this, SearchLight.class);
-	        intent.putExtra(MODE_TYPE, R.id.mode_black);
-	        mSurface.releaseCamera();
-	        startActivity(intent);
-	        finish();
-	        return true;
-	    case R.id.viewfinder:
-	        intent = new Intent(this, SearchLight.class);
-	        intent.putExtra(MODE_TYPE, R.id.mode_viewfinder);
-	        mSurface.releaseCamera();
-	        startActivity(intent);
-	        finish();
-	        return true;
-	    case R.id.normal:
-	        intent = new Intent(this, SearchLight.class);
-	        intent.putExtra(MODE_TYPE, R.id.mode_normal);
-	        mSurface.releaseCamera();
-	        startActivity(intent);
-	        finish();
-	        return true;
-	    default:
-	        return super.onOptionsItemSelected(item);
-	    }
+	    if (item.getItemId() == R.id.black) {
+			intent = new Intent(this, SearchLight.class);
+			intent.putExtra(MODE_TYPE, R.id.mode_black);
+			mSurface.releaseCamera();
+			startActivity(intent);
+			finish();
+			return true;
+		} else if (item.getItemId() == R.id.viewfinder) {
+			intent = new Intent(this, SearchLight.class);
+			intent.putExtra(MODE_TYPE, R.id.mode_viewfinder);
+			mSurface.releaseCamera();
+			startActivity(intent);
+			finish();
+			return true;
+		} else if (item.getItemId() == R.id.normal) {
+			intent = new Intent(this, SearchLight.class);
+			intent.putExtra(MODE_TYPE, R.id.mode_normal);
+			mSurface.releaseCamera();
+			startActivity(intent);
+			finish();
+			return true;
+		} else {
+			return super.onOptionsItemSelected(item);
+		}
+	    
+	   
 	}
 	
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
-        switch(getIntent().getIntExtra(MODE_TYPE, R.id.mode_normal)) {
-        case R.id.mode_black:
+		
+        if (getIntent().getIntExtra(MODE_TYPE, R.id.mode_normal) == R.id.mode_black) {
 			menu.findItem(R.id.black).setVisible(false);
 			menu.findItem(R.id.normal).setVisible(true);
 			menu.findItem(R.id.viewfinder).setVisible(true);
-        	break;
-        case R.id.mode_viewfinder:
+		} else if (getIntent().getIntExtra(MODE_TYPE, R.id.mode_normal) == R.id.mode_viewfinder) {
 			menu.findItem(R.id.black).setVisible(true);
 			menu.findItem(R.id.normal).setVisible(true);
 			menu.findItem(R.id.viewfinder).setVisible(false);
-        	break;
-        case R.id.mode_normal:
-        default:
+		} else {
 			menu.findItem(R.id.black).setVisible(true);
 			menu.findItem(R.id.normal).setVisible(false);
 			menu.findItem(R.id.viewfinder).setVisible(true);
-        	break;
-        }
+		}
 		return super.onPrepareOptionsMenu(menu);
 	}
 
