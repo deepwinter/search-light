@@ -16,9 +16,6 @@ limitations under the License.
 
 package com.scottmain.android.searchlight;
 
-import java.io.IOException;
-import java.util.List;
-
 import android.app.Activity;
 import android.content.Context;
 import android.hardware.Camera;
@@ -30,7 +27,10 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-public class PreviewSurface extends SurfaceView implements SurfaceHolder.Callback {
+import java.io.IOException;
+import java.util.List;
+
+class PreviewSurface extends SurfaceView implements SurfaceHolder.Callback {
 	private final static String TAG = "PreviewSurface";
     SurfaceHolder mHolder;
     Context mContext;
@@ -43,13 +43,13 @@ public class PreviewSurface extends SurfaceView implements SurfaceHolder.Callbac
     boolean hasCamera = false;
     boolean hasSurface = false;
     boolean isViewfinder = false;
-    
+
     private static boolean cameraInfoSupported = false;
-    
+
     private static void checkCameraInfoAvailable() throws NoClassDefFoundError {
     	cameraInfoSupported = android.hardware.Camera.CameraInfo.class != null;
     }
-	
+
 	static {
 		try {
 			checkCameraInfoAvailable();
@@ -73,7 +73,7 @@ public class PreviewSurface extends SurfaceView implements SurfaceHolder.Callbac
 		super(context, attrs);
 		initHolder();
 	}
-	
+
 	private void initHolder() {
         // Install a SurfaceHolder.Callback so we get notified when the
         // underlying surface is created and destroyed.
@@ -98,6 +98,7 @@ public class PreviewSurface extends SurfaceView implements SurfaceHolder.Callbac
     	//Log.d(TAG, "SURFACE DESTROYED");
     }
 
+
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
         // Now that the size is known, set up the camera parameters and begin
         // the preview.
@@ -111,7 +112,7 @@ public class PreviewSurface extends SurfaceView implements SurfaceHolder.Callbac
     	}
     	//Log.d(TAG, "SURFACE CHANGED");
     }
-    
+
     private void setParameters() {
     	mParameters = mCamera.getParameters();
 
@@ -123,10 +124,10 @@ public class PreviewSurface extends SurfaceView implements SurfaceHolder.Callbac
 	        mParameters.setPreviewSize(optimalSize.width, optimalSize.height);
 	        mCamera.setParameters(mParameters);
         }
-        
+
         setCameraDisplayOrientation();
     }
-    
+
     private void setCameraDisplayOrientation() {
     	if (cameraInfoSupported) {
     		android.hardware.Camera.CameraInfo info =
@@ -141,14 +142,14 @@ public class PreviewSurface extends SurfaceView implements SurfaceHolder.Callbac
 		        case Surface.ROTATION_180: degrees = 180; break;
 		        case Surface.ROTATION_270: degrees = 270; break;
 		    }
-		
+
 		    int result = (info.orientation - degrees + 360) % 360;
 		    mCamera.setDisplayOrientation(result);
     	} else {
 		    mCamera.setDisplayOrientation(90);
     	}
     }
-    
+
     public void initCamera() {
     	if (!hasCamera) {
 			try {
@@ -171,7 +172,7 @@ public class PreviewSurface extends SurfaceView implements SurfaceHolder.Callbac
 	        }
     	}
     }
-    
+
     public void lightOff() {
     	if (hasSurface && hasCamera) {
 	        mParameters.setFlashMode(Parameters.FLASH_MODE_OFF);
@@ -190,20 +191,20 @@ public class PreviewSurface extends SurfaceView implements SurfaceHolder.Callbac
     		initCamera();
     	}
     }
-    
+
     public boolean hasCamera() {
     	return hasCamera;
     }
-    
+
     public void setCallback(Callback c) {
     	mCallback = c;
     	mActivity = (Activity) c;
     }
-    
+
     public void setIsViewfinder() {
     	isViewfinder = true;
     }
-    
+
     public void releaseCamera() {
     	if (hasCamera) {
 	        mCamera.stopPreview();
@@ -212,7 +213,7 @@ public class PreviewSurface extends SurfaceView implements SurfaceHolder.Callbac
 	        hasCamera = false;
     	}
     }
-    
+
     public void startPreview() {
     	if (hasCamera) {
 	        setParameters();
@@ -220,7 +221,7 @@ public class PreviewSurface extends SurfaceView implements SurfaceHolder.Callbac
     		mCamera.startPreview();
     	}
     }
-    
+
     // Thank you, ApiDemos :)
     private Size getOptimalPreviewSize(List<Size> sizes, int w, int h) {
         final double ASPECT_TOLERANCE = 0.05;
@@ -231,7 +232,7 @@ public class PreviewSurface extends SurfaceView implements SurfaceHolder.Callbac
         double minDiff = Double.MAX_VALUE;
 
         int targetHeight = h;
-        
+
         // Try to find an size match aspect ratio and size
         for (Size size : sizes) {
             double ratio = (double) size.width / size.height;
@@ -252,10 +253,10 @@ public class PreviewSurface extends SurfaceView implements SurfaceHolder.Callbac
                 }
             }
         }
-        
+
         return optimalSize;
     }
-    
+
     public interface Callback {
     	public void cameraReady();
     	public void cameraNotAvailable();
