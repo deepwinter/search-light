@@ -198,7 +198,10 @@ public class PreviewSurface extends SurfaceView implements SurfaceHolder.Callbac
 
     public void setCallback(Callback c) {
     	mCallback = c;
-    	mActivity = (Activity) c;
+    }
+    
+    public void setActivity(Activity a){
+    	mActivity = a;
     }
 
     public void setIsViewfinder() {
